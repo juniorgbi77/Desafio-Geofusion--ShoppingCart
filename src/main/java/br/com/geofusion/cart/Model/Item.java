@@ -1,4 +1,4 @@
-package br.com.geofusion.cart;
+package br.com.geofusion.cart.Model;
 
 import java.math.BigDecimal;
 

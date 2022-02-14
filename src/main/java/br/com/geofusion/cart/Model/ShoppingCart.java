@@ -1,5 +1,8 @@
-package br.com.geofusion.cart;
+package br.com.geofusion.cart.Model;
 
+
+import br.com.geofusion.cart.Model.Item;
+import br.com.geofusion.cart.Model.Product;
 
 import java.math.BigDecimal;
 import java.util.Collection;
