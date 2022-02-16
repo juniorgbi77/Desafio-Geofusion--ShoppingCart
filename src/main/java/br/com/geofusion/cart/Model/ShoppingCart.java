@@ -1,9 +1,10 @@
 package br.com.geofusion.cart.Model;
 
 
-import br.com.geofusion.cart.Model.Item;
-import br.com.geofusion.cart.Model.Product;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
@@ -11,9 +12,30 @@ import java.util.List;
 /**
  * Classe que representa o carrinho de compras de um cliente.
  */
+
+@Data
+@Entity
+@NoArgsConstructor
 public class ShoppingCart {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column
+    private String clientId;
+
+
+    @OneToMany(
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     private List<Item> items;
+
+    public ShoppingCart(String clientId){
+        super();
+        this.clientId = clientId;
+    }
 
     /**
      * Permite a adição de um novo item no carrinho de compras.
@@ -31,6 +53,18 @@ public class ShoppingCart {
      */
     public void addItem(Product product, BigDecimal unitPrice, int quantity) {
 
+        Item ExistingItem = this.getItemByProduct(product);
+
+        if(ExistingItem == null){
+            Item newItem =  new Item(product,unitPrice,quantity);
+            items.add(newItem);
+            return;
+        }
+
+        ExistingItem.setQuantity(ExistingItem.getQuantity()+quantity);
+        ExistingItem.setUnitPrice(unitPrice);
+        int index = items.indexOf(ExistingItem);
+        items.set(index,ExistingItem);
     }
 
     /**
@@ -41,7 +75,9 @@ public class ShoppingCart {
      * caso o produto não exista no carrinho.
      */
     public boolean removeItem(Product product) {
-        return false;
+        Item ExistingItem = this.getItemByProduct(product);
+        int index = items.indexOf(ExistingItem);
+        return this.removeItem(index);
     }
 
     /**
@@ -54,7 +90,11 @@ public class ShoppingCart {
      * caso o produto não exista no carrinho.
      */
     public boolean removeItem(int itemIndex) {
-        return false;
+        if(itemIndex == -1){
+            return false;
+        }
+        items.remove(itemIndex);
+        return true;
     }
 
     /**
@@ -64,7 +104,14 @@ public class ShoppingCart {
      * @return BigDecimal
      */
     public BigDecimal getAmount() {
-        return null;
+        if(this.items == null){
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal result = this.items
+                .stream()
+                .reduce(BigDecimal.ZERO, (sum, ob) -> sum.add(ob.getAmount()), BigDecimal::add);
+        return result;
     }
 
     /**
@@ -73,6 +120,21 @@ public class ShoppingCart {
      * @return items
      */
     public Collection<Item> getItems() {
-        return null;
+        return this.items;
     }
+
+    /**
+     *
+     * @param product
+     * @return Item
+     */
+    private Item getItemByProduct(Product product){
+        Item item = items.stream()
+                .filter(obj -> product.equals(obj.getProduct()))
+                .findAny()
+                .orElse(null);
+        return item;
+    }
+
+
 }

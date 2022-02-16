@@ -11,28 +11,32 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("product")
 public class ProductController {
 
     @Autowired
-    private ProductService service;
+    private ProductService productService;
 
     @GetMapping
     public List<Product> read(){
-        return service.readAll();
+        return productService.readAll();
     }
 
     @GetMapping("/{id}")
-    public Optional<Product> read(@PathVariable("id") Long id) {
-        return service.read(id);
+    public ResponseEntity<Product> read(@PathVariable("id") Long id) {
+        Product product = productService.read(id);
+        if (product == null) {
+            return ResponseEntity.notFound().build();
+        } else {
+            return ResponseEntity.ok(product);
+        }
     }
 
     @PostMapping("/")
     public ResponseEntity<Product> create(@RequestBody Product product) throws URISyntaxException {
-        Product createdProduct = service.create(product);
+        Product createdProduct = productService.create(product);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(createdProduct.getCode())
@@ -45,7 +49,7 @@ public class ProductController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Product> update(@RequestBody Product product, @PathVariable Long id) {
-        Product updatedProduct = service.update(id, product);
+        Product updatedProduct = productService.update(id, product);
         if (updatedProduct == null) {
             return ResponseEntity.notFound().build();
         } else {
@@ -55,7 +59,7 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> delete(@PathVariable Long id) {
-        service.delete(id);
+        productService.delete(id);
         return ResponseEntity.noContent().build();
     }
 

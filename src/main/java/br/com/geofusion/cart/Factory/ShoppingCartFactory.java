@@ -1,13 +1,22 @@
 package br.com.geofusion.cart.Factory;
 
 import br.com.geofusion.cart.Model.ShoppingCart;
+import br.com.geofusion.cart.Service.ShoppingCartService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.List;
 
 /**
  * Classe responsável pela criação e recuperação dos carrinhos de compras.
  */
+@Service
 public class ShoppingCartFactory {
+
+    @Autowired
+    private ShoppingCartService shoppingCartService;
 
     /**
      * Cria e retorna um novo carrinho de compras para o cliente passado como parâmetro.
@@ -18,7 +27,12 @@ public class ShoppingCartFactory {
      * @return ShoppingCart
      */
     public ShoppingCart create(String clientId) {
-        return null;
+        ShoppingCart ExistingCart = shoppingCartService.FindByClientId(clientId);
+        if(ExistingCart == null){
+            ShoppingCart newShoppingCart = new ShoppingCart(clientId);
+            return shoppingCartService.create(newShoppingCart);
+        }
+        return ExistingCart;
     }
 
     /**
@@ -31,7 +45,15 @@ public class ShoppingCartFactory {
      * @return BigDecimal
      */
     public BigDecimal getAverageTicketAmount() {
-        return null;
+        List<ShoppingCart> carts = shoppingCartService.readAll();
+        if(carts == null ){
+            return BigDecimal.ZERO;
+        }
+        BigDecimal result = carts
+                .stream()
+                .reduce(BigDecimal.ZERO, (sum, ob) -> sum.add(ob.getAmount()), BigDecimal::add);
+
+        return result.divide(new BigDecimal(carts.size()), RoundingMode.HALF_UP);
     }
 
     /**
@@ -43,6 +65,11 @@ public class ShoppingCartFactory {
      * e false caso o cliente não possua um carrinho.
      */
     public boolean invalidate(String clientId) {
-        return false;
+        ShoppingCart ExistingCart = shoppingCartService.FindByClientId(clientId);
+        if(ExistingCart == null){
+            return false;
+        }
+        shoppingCartService.delete(ExistingCart.getId());
+        return true;
     }
 }
