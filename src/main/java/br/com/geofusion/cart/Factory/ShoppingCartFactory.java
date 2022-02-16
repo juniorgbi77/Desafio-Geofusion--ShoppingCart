@@ -46,7 +46,7 @@ public class ShoppingCartFactory {
      */
     public BigDecimal getAverageTicketAmount() {
         List<ShoppingCart> carts = shoppingCartService.readAll();
-        if(carts == null ){
+        if(carts == null){
             return BigDecimal.ZERO;
         }
         BigDecimal result = carts

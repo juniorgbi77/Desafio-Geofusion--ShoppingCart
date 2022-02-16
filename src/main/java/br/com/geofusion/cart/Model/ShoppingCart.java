@@ -51,20 +51,23 @@ public class ShoppingCart {
      * @param unitPrice
      * @param quantity
      */
-    public void addItem(Product product, BigDecimal unitPrice, int quantity) {
+    public void addItem(Product product, BigDecimal unitPrice, int quantity){
+        try{
+            Item ExistingItem = this.getItemByProduct(product);
 
-        Item ExistingItem = this.getItemByProduct(product);
+            if(ExistingItem == null){
+                Item newItem =  new Item(product,unitPrice,quantity);
+                items.add(newItem);
+                return;
+            }
 
-        if(ExistingItem == null){
-            Item newItem =  new Item(product,unitPrice,quantity);
-            items.add(newItem);
-            return;
+            ExistingItem.setQuantity(ExistingItem.getQuantity()+quantity);
+            ExistingItem.setUnitPrice(unitPrice);
+            int index = items.indexOf(ExistingItem);
+            items.set(index,ExistingItem);
+        }catch (Exception e){
+            throw new RuntimeException(e);
         }
-
-        ExistingItem.setQuantity(ExistingItem.getQuantity()+quantity);
-        ExistingItem.setUnitPrice(unitPrice);
-        int index = items.indexOf(ExistingItem);
-        items.set(index,ExistingItem);
     }
 
     /**

@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -27,13 +28,16 @@ public class CartController {
 
 
     @GetMapping("/")
-    public ResponseEntity<List<ShoppingCart>> readAll(){
+    public ResponseEntity readAll(){
         return ResponseEntity.status(HttpStatus.OK).body(shoppingCartService.readAll());
     }
 
-    @GetMapping("/getAverageTicket")
-    public BigDecimal getAverageTicket(){
-        return shoppingCartFactory.getAverageTicketAmount();
+    @GetMapping("/getaverageticket")
+    public ResponseEntity getAverageTicket(){
+        if(shoppingCartService.readAll().isEmpty()){
+            return ResponseEntity.status(HttpStatus.OK).body("Não existe nenhum carrinho!");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(shoppingCartFactory.getAverageTicketAmount());
     }
 
     @PostMapping("/{clientId}")
@@ -49,33 +53,41 @@ public class CartController {
         boolean found = shoppingCartFactory.invalidate(clientId);
         if(!found){
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .build();
+                    .body("Esse carrinho não existe!");
         }
-        return ResponseEntity.status(HttpStatus.OK)
-                .build();
+        return ResponseEntity.status(HttpStatus.OK).body("Deletado com sucesso!");
     }
 
     @PostMapping("additem/{clientId}/{ProductId}")
-    public ResponseEntity<ShoppingCart> addItem(@PathVariable("clientId") String clientId,@PathVariable("ProductId") Long ProductId, @RequestBody ObjectNode objectNode){
-        ShoppingCart ExistingCart = shoppingCartService.FindByClientId(clientId);
-        Product product = productService.read(ProductId);
+    @Transactional
+    public ResponseEntity addItem(@PathVariable("clientId") String clientId,@PathVariable("ProductId") Long ProductId, @RequestBody ObjectNode objectNode){
 
-        if(ExistingCart == null && product == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        ShoppingCart ExistingCart = shoppingCartService.FindByClientId(clientId);
+        if(ExistingCart == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Esse carrinho não existe!");
+        }
+
+        Product product = productService.read(ProductId);
+        if(product == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Esse produto não existe!");
         }
 
         ExistingCart.addItem(product,BigDecimal.valueOf(objectNode.get("unitPrice").asDouble()), objectNode.get("quantity").asInt());
         shoppingCartService.update(ExistingCart);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(ExistingCart);
+        return ResponseEntity.status(HttpStatus.OK).body(ExistingCart);
     }
 
     @DeleteMapping("removeitem/{clientId}/{ProductId}")
-    public ResponseEntity<ShoppingCart> RemoveItem(@PathVariable("clientId") String clientId,@PathVariable("ProductId")  Long ProductId){
+    @Transactional
+    public ResponseEntity RemoveItem(@PathVariable("clientId") String clientId,@PathVariable("ProductId")  Long ProductId){
         ShoppingCart ExistingCart = shoppingCartService.FindByClientId(clientId);
-        Product product = productService.read(ProductId);
+        if(ExistingCart == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Esse carrinho não existe!");
+        }
 
-        if(ExistingCart == null && product == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        Product product = productService.read(ProductId);
+        if(product == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Esse produto não existe!");
         }
 
         ExistingCart.removeItem(product);

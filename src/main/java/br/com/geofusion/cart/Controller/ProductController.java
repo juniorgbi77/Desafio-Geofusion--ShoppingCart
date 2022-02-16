@@ -4,6 +4,7 @@ package br.com.geofusion.cart.Controller;
 import br.com.geofusion.cart.Model.Product;
 import br.com.geofusion.cart.Service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -20,47 +21,42 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping
-    public List<Product> read(){
-        return productService.readAll();
+    public ResponseEntity read(){
+        return ResponseEntity.status(HttpStatus.OK).body(productService.readAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> read(@PathVariable("id") Long id) {
+    public ResponseEntity read(@PathVariable("id") Long id) {
         Product product = productService.read(id);
         if (product == null) {
-            return ResponseEntity.notFound().build();
-        } else {
-            return ResponseEntity.ok(product);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Esse produto não existe!");
         }
+        return ResponseEntity.status(HttpStatus.OK).body(product);
     }
 
     @PostMapping("/")
-    public ResponseEntity<Product> create(@RequestBody Product product) throws URISyntaxException {
+    public ResponseEntity<Product> create(@RequestBody Product product){
         Product createdProduct = productService.create(product);
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(createdProduct.getCode())
-                .toUri();
-
-        return ResponseEntity.created(uri)
-                .body(createdProduct);
-
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> update(@RequestBody Product product, @PathVariable Long id) {
+    public ResponseEntity update(@RequestBody Product product, @PathVariable Long id) {
         Product updatedProduct = productService.update(id, product);
         if (updatedProduct == null) {
-            return ResponseEntity.notFound().build();
-        } else {
-            return ResponseEntity.ok(updatedProduct);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Esse produto não existe!");
         }
+        return ResponseEntity.status(HttpStatus.OK).body(updatedProduct);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> delete(@PathVariable Long id) {
-        productService.delete(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity delete(@PathVariable Long id) {
+        Product product = productService.read(id);
+        if (product == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Esse produto não existe!");
+        }
+        productService.delete(product.getCode());
+        return ResponseEntity.status(HttpStatus.OK).body("Deletado com sucesso!");
     }
 
 }
