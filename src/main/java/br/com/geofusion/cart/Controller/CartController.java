@@ -83,7 +83,7 @@ public class CartController {
 
     @DeleteMapping("removeitem/{clientId}/{productId}")
     @Transactional
-    public ResponseEntity RemoveItem(@PathVariable("clientId") String clientId, @PathVariable("ProductId") Long productId) {
+    public ResponseEntity RemoveItem(@PathVariable("clientId") String clientId, @PathVariable("productId") Long productId) {
         ShoppingCart ExistingCart = shoppingCartService.FindByClientId(clientId);
         if (ExistingCart == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Esse carrinho não existe!");
