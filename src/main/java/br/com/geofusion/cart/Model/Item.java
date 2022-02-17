@@ -1,11 +1,32 @@
-package br.com.geofusion.cart;
+package br.com.geofusion.cart.Model;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
 import java.math.BigDecimal;
 
 /**
  * Classe que representa um item no carrinho de compras.
  */
+
+@Data
+@Entity
+@NoArgsConstructor
 public class Item {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
+    @OneToOne
+    private Product product;
+
+    @Column(nullable = false)
+    private BigDecimal unitPrice;
+
+    @Column(nullable = false)
+    private int quantity;
 
     /**
      * Construtor da classe Item.
@@ -15,6 +36,10 @@ public class Item {
      * @param quantity
      */
     public Item(Product product, BigDecimal unitPrice, int quantity) {
+        super();
+        this.product = product;
+        this.unitPrice = unitPrice;
+        this.quantity = quantity;
     }
 
     /**
@@ -23,7 +48,7 @@ public class Item {
      * @return Produto
      */
     public Product getProduct() {
-        return null;
+        return this.product;
     }
 
     /**
@@ -32,7 +57,7 @@ public class Item {
      * @return BigDecimal
      */
     public BigDecimal getUnitPrice() {
-        return null;
+        return this.unitPrice;
     }
 
     /**
@@ -41,7 +66,7 @@ public class Item {
      * @return int
      */
     public int getQuantity() {
-        return 0;
+        return this.quantity;
     }
 
     /**
@@ -50,7 +75,8 @@ public class Item {
      * @return BigDecimal
      */
     public BigDecimal getAmount() {
-        return null;
+        BigDecimal quantity = new BigDecimal(this.quantity);
+        return this.unitPrice.multiply(quantity);
     }
 }
 
