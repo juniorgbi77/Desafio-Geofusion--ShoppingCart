@@ -13,13 +13,12 @@ public class ProductService {
     @Autowired
     private ProductRepository repository;
 
-    public List<Product> readAll(){
+    public List<Product> readAll() {
         return repository.findAll();
     }
 
     public Product read(Long id) {
-        return repository.findById(id)
-                .orElse(null);
+        return repository.findById(id).orElse(null);
 
     }
 
@@ -28,14 +27,12 @@ public class ProductService {
     }
 
     public Product update(Long id, Product newProduct) {
-        return repository.findById(id)
-                .map(product -> {
-                    product.setDescription(newProduct.getDescription());
-                    return repository.save(product);
-                })
-                .orElseGet(() -> {
-                    return null;
-                });
+        return repository.findById(id).map(product -> {
+            product.setDescription(newProduct.getDescription());
+            return repository.save(product);
+        }).orElseGet(() -> {
+            return null;
+        });
     }
 
     public void delete(Long id) {

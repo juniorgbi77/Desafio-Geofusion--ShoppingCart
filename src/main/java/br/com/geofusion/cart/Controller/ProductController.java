@@ -21,7 +21,7 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping
-    public ResponseEntity read(){
+    public ResponseEntity read() {
         return ResponseEntity.status(HttpStatus.OK).body(productService.readAll());
     }
 
@@ -35,7 +35,7 @@ public class ProductController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<Product> create(@RequestBody Product product){
+    public ResponseEntity<Product> create(@RequestBody Product product) {
         Product createdProduct = productService.create(product);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
     }

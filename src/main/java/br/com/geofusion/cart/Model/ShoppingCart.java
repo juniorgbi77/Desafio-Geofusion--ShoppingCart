@@ -32,40 +32,40 @@ public class ShoppingCart {
     )
     private List<Item> items;
 
-    public ShoppingCart(String clientId){
+    public ShoppingCart(String clientId) {
         super();
         this.clientId = clientId;
     }
 
     /**
      * Permite a adição de um novo item no carrinho de compras.
-     *
+     * <p>
      * Caso o item já exista no carrinho para este mesmo produto, as seguintes regras deverão ser seguidas:
      * - A quantidade do item deverá ser a soma da quantidade atual com a quantidade passada como parâmetro.
      * - Se o valor unitário informado for diferente do valor unitário atual do item, o novo valor unitário do item deverá ser
      * o passado como parâmetro.
-     *
+     * <p>
      * Devem ser lançadas subclasses de RuntimeException caso não seja possível adicionar o item ao carrinho de compras.
      *
      * @param product
      * @param unitPrice
      * @param quantity
      */
-    public void addItem(Product product, BigDecimal unitPrice, int quantity){
-        try{
+    public void addItem(Product product, BigDecimal unitPrice, int quantity) {
+        try {
             Item ExistingItem = this.getItemByProduct(product);
 
-            if(ExistingItem == null){
-                Item newItem =  new Item(product,unitPrice,quantity);
+            if (ExistingItem == null) {
+                Item newItem = new Item(product, unitPrice, quantity);
                 items.add(newItem);
                 return;
             }
 
-            ExistingItem.setQuantity(ExistingItem.getQuantity()+quantity);
+            ExistingItem.setQuantity(ExistingItem.getQuantity() + quantity);
             ExistingItem.setUnitPrice(unitPrice);
             int index = items.indexOf(ExistingItem);
-            items.set(index,ExistingItem);
-        }catch (Exception e){
+            items.set(index, ExistingItem);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -93,7 +93,7 @@ public class ShoppingCart {
      * caso o produto não exista no carrinho.
      */
     public boolean removeItem(int itemIndex) {
-        if(itemIndex == -1){
+        if (itemIndex == -1) {
             return false;
         }
         items.remove(itemIndex);
@@ -107,7 +107,7 @@ public class ShoppingCart {
      * @return BigDecimal
      */
     public BigDecimal getAmount() {
-        if(this.items == null){
+        if (this.items == null) {
             return BigDecimal.ZERO;
         }
 
@@ -127,11 +127,10 @@ public class ShoppingCart {
     }
 
     /**
-     *
      * @param product
      * @return Item
      */
-    private Item getItemByProduct(Product product){
+    private Item getItemByProduct(Product product) {
         Item item = items.stream()
                 .filter(obj -> product.equals(obj.getProduct()))
                 .findAny()

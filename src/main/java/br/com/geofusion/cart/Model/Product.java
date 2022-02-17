@@ -8,7 +8,7 @@ import javax.persistence.*;
 /**
  * Classe que representa um produto que pode ser adicionado
  * como item ao carrinho de compras.
- *
+ * <p>
  * Importante: Dois produtos são considerados iguais quando ambos possuem o
  * mesmo código.
  */

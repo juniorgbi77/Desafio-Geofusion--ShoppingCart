@@ -28,7 +28,7 @@ public class ShoppingCartFactory {
      */
     public ShoppingCart create(String clientId) {
         ShoppingCart ExistingCart = shoppingCartService.FindByClientId(clientId);
-        if(ExistingCart == null){
+        if (ExistingCart == null) {
             ShoppingCart newShoppingCart = new ShoppingCart(clientId);
             return shoppingCartService.create(newShoppingCart);
         }
@@ -46,7 +46,7 @@ public class ShoppingCartFactory {
      */
     public BigDecimal getAverageTicketAmount() {
         List<ShoppingCart> carts = shoppingCartService.readAll();
-        if(carts == null){
+        if (carts == null) {
             return BigDecimal.ZERO;
         }
         BigDecimal result = carts
@@ -66,7 +66,7 @@ public class ShoppingCartFactory {
      */
     public boolean invalidate(String clientId) {
         ShoppingCart ExistingCart = shoppingCartService.FindByClientId(clientId);
-        if(ExistingCart == null){
+        if (ExistingCart == null) {
             return false;
         }
         shoppingCartService.delete(ExistingCart.getId());

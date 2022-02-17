@@ -14,7 +14,7 @@ public class ShoppingCartService {
     @Autowired
     private ShoppingCartRepository repository;
 
-    public List<ShoppingCart> readAll(){
+    public List<ShoppingCart> readAll() {
         return repository.findAll();
     }
 
