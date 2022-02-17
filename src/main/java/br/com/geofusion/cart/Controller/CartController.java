@@ -27,7 +27,7 @@ public class CartController {
     private ProductService productService;
 
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity readAll() {
         return ResponseEntity.status(HttpStatus.OK).body(shoppingCartService.readAll());
     }
@@ -58,9 +58,9 @@ public class CartController {
         return ResponseEntity.status(HttpStatus.OK).body("Deletado com sucesso!");
     }
 
-    @PostMapping("additem/{clientId}/{ProductId}")
+    @PostMapping("additem/{clientId}/{productId}")
     @Transactional
-    public ResponseEntity addItem(@PathVariable("clientId") String clientId, @PathVariable("ProductId") Long ProductId, @RequestBody ObjectNode objectNode) {
+    public ResponseEntity addItem(@PathVariable("clientId") String clientId, @PathVariable("productId") Long ProductId, @RequestBody ObjectNode objectNode) {
 
         ShoppingCart ExistingCart = shoppingCartService.FindByClientId(clientId);
         if (ExistingCart == null) {
@@ -70,6 +70,10 @@ public class CartController {
         Product product = productService.read(ProductId);
         if (product == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Esse produto não existe!");
+        }
+
+        if (objectNode.get("unitPrice") == null || objectNode.get("quantity") == null) {
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("O parametro 'unitPrice' e 'quantity' são necessarios ");
         }
 
         ExistingCart.addItem(product, BigDecimal.valueOf(objectNode.get("unitPrice").asDouble()), objectNode.get("quantity").asInt());
@@ -77,15 +81,15 @@ public class CartController {
         return ResponseEntity.status(HttpStatus.OK).body(ExistingCart);
     }
 
-    @DeleteMapping("removeitem/{clientId}/{ProductId}")
+    @DeleteMapping("removeitem/{clientId}/{productId}")
     @Transactional
-    public ResponseEntity RemoveItem(@PathVariable("clientId") String clientId, @PathVariable("ProductId") Long ProductId) {
+    public ResponseEntity RemoveItem(@PathVariable("clientId") String clientId, @PathVariable("ProductId") Long productId) {
         ShoppingCart ExistingCart = shoppingCartService.FindByClientId(clientId);
         if (ExistingCart == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Esse carrinho não existe!");
         }
 
-        Product product = productService.read(ProductId);
+        Product product = productService.read(productId);
         if (product == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Esse produto não existe!");
         }
@@ -93,6 +97,27 @@ public class CartController {
         ExistingCart.removeItem(product);
         shoppingCartService.update(ExistingCart);
         return ResponseEntity.status(HttpStatus.OK).body(ExistingCart);
+    }
+
+    @PostMapping("changeprice/{clientId}/{itemID}")
+    @Transactional
+    public ResponseEntity ChangePrice(@PathVariable("clientId") String clientId, @PathVariable("itemID") Long itemID, @RequestBody ObjectNode objectNode) {
+
+        ShoppingCart ExistingCart = shoppingCartService.FindByClientId(clientId);
+        if (ExistingCart == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Esse carrinho não existe!");
+        }
+
+        if (objectNode.get("unitPrice") == null) {
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("O parametro 'unitPrice' é necessario ");
+        }
+
+        if(ExistingCart.changeValue(itemID, BigDecimal.valueOf(objectNode.get("unitPrice").asDouble()))){
+            shoppingCartService.update(ExistingCart);
+            return ResponseEntity.status(HttpStatus.OK).body(ExistingCart);
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Esse Item não existe no carrinho!");
+
     }
 
 

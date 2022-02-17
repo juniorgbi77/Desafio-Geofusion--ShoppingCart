@@ -138,5 +138,35 @@ public class ShoppingCart {
         return item;
     }
 
+    /**
+     * @param itemId
+     * @return Item
+     */
+    private Item getItemByID(Long itemId) {
+        Item item = items.stream()
+                .filter(obj -> itemId.equals(obj.getId()))
+                .findAny()
+                .orElse(null);
+        return item;
+    }
+
+    /**
+     *
+     * @param itemId
+     * @param unitPrice
+     * @return
+     */
+    public boolean changeValue(Long itemId, BigDecimal unitPrice) {
+            Item ExistingItem = this.getItemByID(itemId);
+
+            if (ExistingItem == null) {
+                return false;
+            }
+            ExistingItem.setUnitPrice(unitPrice);
+            int index = items.indexOf(ExistingItem);
+            items.set(index, ExistingItem);
+            return true;
+    }
+
 
 }
